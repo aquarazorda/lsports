@@ -1,18 +1,10 @@
-import { Component, OnInit } from '@angular/core';
-import { correctData, invalidData } from './utils/data';
-import * as E from 'fp-ts/Either';
+import { Component } from '@angular/core';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
-export class AppComponent implements OnInit {
+export class AppComponent {
   title = 'lsports';
-
-  public data: E.Either<Error, SportEvent[]> = E.left(new Error('Data not loaded yet!'));
-
-  async ngOnInit() {
-    this.data = await correctData();
-  }
 }

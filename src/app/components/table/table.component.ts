@@ -1,47 +1,66 @@
 import { Component, Input, OnInit, ViewChild } from '@angular/core';
 import { reduce, unsafeDeleteAt } from 'fp-ts/lib/Array';
-import { pipe } from 'fp-ts/lib/function';
+import Utils from '../../utils/utils';
 
 @Component({
-  selector: 'app-table[data]',
+  selector: 'app-table[input]',
   templateUrl: './table.component.html',
   styleUrls: ['./table.component.css']
 })
-export class TableComponent implements OnInit {
+export class TableComponent implements OnInit, TableHandler<any> {
 
   @ViewChild('dataTable') table: any;
-  @Input() data!: TableData<any>;
+  @Input() input!: TableInput<any>;
 
+  // I don't like this, but during this phase, input is unfortunately undefined
+  public data!: TableData<any>;
   public columns!: Column<any>[];
+  public rowNgClass!: (data: TableItem<any>) => { [key: string]: boolean };
+  private intervals: any[] = [];
+  public utils = Utils;
 
   constructor() { }
 
   ngOnInit() {
-    this.checkData(this.data);
+    this.columns = this.input.columns;
+    this.rowNgClass = this.input.rowNgClass;
+    this.checkAndUpdateRows(this.input.rows);
+    if (this.input.checker) {
+      this.intervals.push(
+        setInterval(() => this.checkAndUpdateRows(this.data), this.input.checker.interval)
+      );
+    }
   }
-
-  // Methods which need to be overloaded when extending this component
-  protected dataPipe = (data: TableData<any>) => data;
-  //
 
   public inEditState: any = {};
 
-  public checkData = <I>(data: TableData<I>): TableData<I> => this.data = this.dataPipe(data);
-
-  public toggleExpandRow = <I>(row: TableItem<I>) => this.table.rowDetail.toggleExpandRow(row);
-
-  public toggleEdit = (index: number): void => {
-    if (this.inEditState[index]) this.checkData(this.data);
-    this.inEditState[index] = !this.inEditState[index];
+  public checkAndUpdateRows = (data: any) => {
+    this.data = this.input.checkRows(data);
   }
 
-  public delete = (index: number): void => {
-    this.toggleEdit(index);
+  public createEmptyRow = <T>() => reduce(
+    {},
+    (acc, { name }: Column<T>) => ({ ...acc, [name]: name == "Starting Time" ? new Date() : "" })
+  )(this.input.columns) as TableItem<T>;
 
-    pipe(
-      unsafeDeleteAt(index, this.data),
-      this.checkData
-    )
+  public add = () => {
+    this.data.unshift(this.createEmptyRow());
+    this.toggleEdit(0);
+  };
+
+  public toggleExpandRow = <T>(row: TableItem<T>) => this.table.rowDetail.toggleExpandRow(row);
+
+  public toggleEdit = (index: number): void => {
+    if (this.inEditState[index]) this.checkAndUpdateRows(this.data);
+    this.inEditState[index] = !this.inEditState[index];
+  };
+
+  public editDate = (index: number, key: any, value: any) =>
+    this.data[index][key] = new Date(value);
+
+  public delete = (index: number): void => {
+    unsafeDeleteAt(index, this.data);
+    this.toggleEdit(index);
   };
 
   // For now we just toggle back and forth between the edit state,
@@ -50,6 +69,10 @@ export class TableComponent implements OnInit {
   // we can guarantee that the values are saved.
   public save = (index: number) => {
     this.toggleEdit(index);
+  }
+
+  ngOnDestroy() {
+    this.intervals.forEach(interval => clearInterval(interval));
   }
 
 

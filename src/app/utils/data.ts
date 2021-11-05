@@ -1,7 +1,16 @@
 import Utils from "./utils";
 import * as TE from 'fp-ts/lib/TaskEither';
 
-const correctData: TE.TaskEither<Error, SportEvent[]> = TE.right([{
+const columnsData: TE.TaskEither<Error, Column<SportEvent>[]> = TE.right([
+    { name: "SportName", type: 'string', defaultValue: '' },
+    { name: "Location", type: 'string', defaultValue: '' },
+    { name: "League", type: 'string', defaultValue: '' },
+    { name: "Teams Playing", type: 'string', defaultValue: '' },
+    { name: "Starting Time", type: 'date', defaultValue: Utils.newDate() },
+    { name: "Additional Data", type: 'textarea', defaultValue: '', props: { expandableRow: true } }
+]);
+
+const sportEventData: TE.TaskEither<Error, SportEvent[]> = TE.right([{
     "SportName": "Football",
     "Location": "Germany",
     "League": "Bundesliga",
@@ -34,6 +43,7 @@ const correctData: TE.TaskEither<Error, SportEvent[]> = TE.right([{
 const invalidData = TE.left(new Error("404 not found"));
 
 export {
-    correctData,
+    sportEventData,
+    columnsData,
     invalidData
 }

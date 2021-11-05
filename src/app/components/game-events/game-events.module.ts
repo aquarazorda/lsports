@@ -2,8 +2,8 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { GameEventsComponent } from './game-events.component';
 import { TableModule } from '../table/table.module';
-import { NgxDatatableModule } from '@swimlane/ngx-datatable';
 import { FormsModule } from '@angular/forms';
+import { NgxFpTsModule } from 'ngx-fp-ts';
 
 @NgModule({
   declarations: [
@@ -12,7 +12,7 @@ import { FormsModule } from '@angular/forms';
   imports: [
     CommonModule,
     TableModule,
-    NgxDatatableModule,
+    NgxFpTsModule,
     FormsModule
   ],
   exports: [

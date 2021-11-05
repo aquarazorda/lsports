@@ -1,28 +1,37 @@
-type TableItem<I> = I;
+type TableItem<T> = T;
 
-type TableData<I> = Array<TableItem<I>>;
+type TableData<T> = TableItem<T>[];
+
+type TableInput<T> = {
+    rows: TableData<T>;
+    columns: Column<T>[];
+    checkRows: (data: TableData<T>) => TableData<T>;
+    rowNgClass: (data: TableItem<T>) => { [key: string]: boolean };
+    checker?: { enabled: true, interval: number };
+}
 
 interface Props {
     expandableRow?: boolean,
-    editable?: boolean,
-    type: "string" | "textarea" | "date"
+    editable?: boolean
 }
 
-interface Column<I> {
-    name: keyof I;
-    props?: Props
+interface Column<T> {
+    name: string;
+    type: "string" | "textarea" | "date";
+    defaultValue: string | Date;
+    props?: Props;
 }
 
-interface TableHandler<I> {
-    columns: Column<I>[];
-    data: TableData<I>[];
+interface TableHandler<T> {
+    input: TableInput<T>;
+    columns: Column<T>[];
+    data: TableData<T>;
     inEditState: { [key: string]: boolean };
-    checkData: (data: TableData<I>) => TableData<I>;
-    toggleExpandRow: (row: TableData<I>) => void;
+    checkAndUpdateRows: (data: TableData<T>) => void;
+    toggleExpandRow: (row: TableItem<T>) => void;
     toggleEdit: (id: number) => void;
     delete: (id: number) => void;
     save: (id: number) => void;
     add: () => void;
-    readonly dataPipe: (data: TableData<I>) => TableData<I>;
-    readonly createEmptyRow: () => TableItem<I>;
+    readonly createEmptyRow: () => TableItem<T>;
 }
